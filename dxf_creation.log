@@ -1,0 +1,156 @@
+2025-07-07 12:17:40,043 - INFO - Created output directory: test_output
+2025-07-07 12:17:40,043 - INFO - DXF Creator initialized with output directory: test_output
+2025-07-07 12:17:40,043 - INFO - creating ACAD_COLOR dictionary
+2025-07-07 12:17:40,043 - INFO - creating ACAD_GROUP dictionary
+2025-07-07 12:17:40,043 - INFO - creating ACAD_LAYOUT dictionary
+2025-07-07 12:17:40,043 - INFO - creating ACAD_MATERIAL dictionary
+2025-07-07 12:17:40,044 - INFO - creating ACAD_MLEADERSTYLE dictionary
+2025-07-07 12:17:40,044 - INFO - creating ACAD_MLINESTYLE dictionary
+2025-07-07 12:17:40,044 - INFO - creating ACAD_PLOTSETTINGS dictionary
+2025-07-07 12:17:40,044 - INFO - creating ACAD_PLOTSTYLENAME dictionary
+2025-07-07 12:17:40,044 - INFO - creating ACAD_SCALELIST dictionary
+2025-07-07 12:17:40,044 - INFO - creating ACAD_TABLESTYLE dictionary
+2025-07-07 12:17:40,044 - INFO - creating ACAD_VISUALSTYLE dictionary
+2025-07-07 12:17:40,045 - INFO - Adding basic geometric entities...
+2025-07-07 12:17:40,045 - ERROR - Error creating basic DXF file: 'Text' object has no attribute 'set_pos'
+2025-07-07 12:19:47,984 - INFO - DXF Creator initialized with output directory: test_output
+2025-07-07 12:19:47,985 - INFO - creating ACAD_COLOR dictionary
+2025-07-07 12:19:47,985 - INFO - creating ACAD_GROUP dictionary
+2025-07-07 12:19:47,985 - INFO - creating ACAD_LAYOUT dictionary
+2025-07-07 12:19:47,985 - INFO - creating ACAD_MATERIAL dictionary
+2025-07-07 12:19:47,985 - INFO - creating ACAD_MLEADERSTYLE dictionary
+2025-07-07 12:19:47,985 - INFO - creating ACAD_MLINESTYLE dictionary
+2025-07-07 12:19:47,986 - INFO - creating ACAD_PLOTSETTINGS dictionary
+2025-07-07 12:19:47,986 - INFO - creating ACAD_PLOTSTYLENAME dictionary
+2025-07-07 12:19:47,986 - INFO - creating ACAD_SCALELIST dictionary
+2025-07-07 12:19:47,986 - INFO - creating ACAD_TABLESTYLE dictionary
+2025-07-07 12:19:47,986 - INFO - creating ACAD_VISUALSTYLE dictionary
+2025-07-07 12:19:47,987 - INFO - Adding basic geometric entities...
+2025-07-07 12:19:47,990 - INFO - did not write header var $INTERFEREOBJVS, value is None.
+2025-07-07 12:19:47,990 - INFO - did not write header var $INTERFEREVPVS, value is None.
+2025-07-07 12:19:47,992 - INFO - Basic DXF file created successfully: test_output/test_basic.dxf
+2025-07-07 12:19:47,993 - INFO - Creating DXF from 4 points...
+2025-07-07 12:19:47,993 - INFO - creating ACAD_COLOR dictionary
+2025-07-07 12:19:47,993 - INFO - creating ACAD_GROUP dictionary
+2025-07-07 12:19:47,993 - INFO - creating ACAD_LAYOUT dictionary
+2025-07-07 12:19:47,993 - INFO - creating ACAD_MATERIAL dictionary
+2025-07-07 12:19:47,993 - INFO - creating ACAD_MLEADERSTYLE dictionary
+2025-07-07 12:19:47,993 - INFO - creating ACAD_MLINESTYLE dictionary
+2025-07-07 12:19:47,993 - INFO - creating ACAD_PLOTSETTINGS dictionary
+2025-07-07 12:19:47,994 - INFO - creating ACAD_PLOTSTYLENAME dictionary
+2025-07-07 12:19:47,994 - INFO - creating ACAD_SCALELIST dictionary
+2025-07-07 12:19:47,994 - INFO - creating ACAD_TABLESTYLE dictionary
+2025-07-07 12:19:47,994 - INFO - creating ACAD_VISUALSTYLE dictionary
+2025-07-07 12:19:47,996 - INFO - did not write header var $INTERFEREOBJVS, value is None.
+2025-07-07 12:19:47,996 - INFO - did not write header var $INTERFEREVPVS, value is None.
+2025-07-07 12:19:47,999 - INFO - Points DXF file created successfully: test_output/test_points.dxf
+2025-07-07 12:19:47,999 - INFO - Creating DXF from JSON data...
+2025-07-07 12:19:47,999 - INFO - creating ACAD_COLOR dictionary
+2025-07-07 12:19:47,999 - INFO - creating ACAD_GROUP dictionary
+2025-07-07 12:19:47,999 - INFO - creating ACAD_LAYOUT dictionary
+2025-07-07 12:19:48,000 - INFO - creating ACAD_MATERIAL dictionary
+2025-07-07 12:19:48,000 - INFO - creating ACAD_MLEADERSTYLE dictionary
+2025-07-07 12:19:48,000 - INFO - creating ACAD_MLINESTYLE dictionary
+2025-07-07 12:19:48,000 - INFO - creating ACAD_PLOTSETTINGS dictionary
+2025-07-07 12:19:48,000 - INFO - creating ACAD_PLOTSTYLENAME dictionary
+2025-07-07 12:19:48,000 - INFO - creating ACAD_SCALELIST dictionary
+2025-07-07 12:19:48,000 - INFO - creating ACAD_TABLESTYLE dictionary
+2025-07-07 12:19:48,000 - INFO - creating ACAD_VISUALSTYLE dictionary
+2025-07-07 12:19:48,002 - INFO - did not write header var $INTERFEREOBJVS, value is None.
+2025-07-07 12:19:48,003 - INFO - did not write header var $INTERFEREVPVS, value is None.
+2025-07-07 12:19:48,005 - INFO - JSON DXF file created successfully: test_output/test_json.dxf
+2025-07-07 12:19:48,005 - INFO - Creating SolidWorks-style DXF drawing...
+2025-07-07 12:19:48,005 - INFO - creating ACAD_COLOR dictionary
+2025-07-07 12:19:48,005 - INFO - creating ACAD_GROUP dictionary
+2025-07-07 12:19:48,005 - INFO - creating ACAD_LAYOUT dictionary
+2025-07-07 12:19:48,005 - INFO - creating ACAD_MATERIAL dictionary
+2025-07-07 12:19:48,005 - INFO - creating ACAD_MLEADERSTYLE dictionary
+2025-07-07 12:19:48,005 - INFO - creating ACAD_MLINESTYLE dictionary
+2025-07-07 12:19:48,005 - INFO - creating ACAD_PLOTSETTINGS dictionary
+2025-07-07 12:19:48,006 - INFO - creating ACAD_PLOTSTYLENAME dictionary
+2025-07-07 12:19:48,006 - INFO - creating ACAD_SCALELIST dictionary
+2025-07-07 12:19:48,006 - INFO - creating ACAD_TABLESTYLE dictionary
+2025-07-07 12:19:48,006 - INFO - creating ACAD_VISUALSTYLE dictionary
+2025-07-07 12:19:48,009 - INFO - did not write header var $INTERFEREOBJVS, value is None.
+2025-07-07 12:19:48,009 - INFO - did not write header var $INTERFEREVPVS, value is None.
+2025-07-07 12:19:48,011 - INFO - SolidWorks-style DXF file created successfully: test_output/test_solidworks.dxf
+2025-07-07 12:19:48,012 - INFO - Found 4 DXF files in output directory
+2025-07-07 12:19:48,018 - INFO - DXF file validation successful: test_output/test_basic.dxf
+2025-07-07 12:19:48,018 - INFO - File contains 5 entities
+2025-07-07 12:19:48,023 - INFO - DXF file validation successful: test_output/test_points.dxf
+2025-07-07 12:19:48,023 - INFO - File contains 12 entities
+2025-07-07 12:19:48,028 - INFO - DXF file validation successful: test_output/test_json.dxf
+2025-07-07 12:19:48,028 - INFO - File contains 2 entities
+2025-07-07 12:19:48,034 - INFO - DXF file validation successful: test_output/test_solidworks.dxf
+2025-07-07 12:19:48,035 - INFO - File contains 16 entities
+2025-07-07 12:19:59,142 - INFO - Created output directory: output
+2025-07-07 12:19:59,142 - INFO - DXF Creator initialized with output directory: output
+2025-07-07 12:19:59,143 - INFO - creating ACAD_COLOR dictionary
+2025-07-07 12:19:59,143 - INFO - creating ACAD_GROUP dictionary
+2025-07-07 12:19:59,143 - INFO - creating ACAD_LAYOUT dictionary
+2025-07-07 12:19:59,143 - INFO - creating ACAD_MATERIAL dictionary
+2025-07-07 12:19:59,143 - INFO - creating ACAD_MLEADERSTYLE dictionary
+2025-07-07 12:19:59,143 - INFO - creating ACAD_MLINESTYLE dictionary
+2025-07-07 12:19:59,143 - INFO - creating ACAD_PLOTSETTINGS dictionary
+2025-07-07 12:19:59,143 - INFO - creating ACAD_PLOTSTYLENAME dictionary
+2025-07-07 12:19:59,144 - INFO - creating ACAD_SCALELIST dictionary
+2025-07-07 12:19:59,144 - INFO - creating ACAD_TABLESTYLE dictionary
+2025-07-07 12:19:59,144 - INFO - creating ACAD_VISUALSTYLE dictionary
+2025-07-07 12:19:59,145 - INFO - Adding basic geometric entities...
+2025-07-07 12:19:59,148 - INFO - did not write header var $INTERFEREOBJVS, value is None.
+2025-07-07 12:19:59,148 - INFO - did not write header var $INTERFEREVPVS, value is None.
+2025-07-07 12:19:59,151 - INFO - Basic DXF file created successfully: output/basic_drawing.dxf
+2025-07-07 12:19:59,151 - INFO - Creating DXF from 5 points...
+2025-07-07 12:19:59,151 - INFO - creating ACAD_COLOR dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_GROUP dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_LAYOUT dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_MATERIAL dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_MLEADERSTYLE dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_MLINESTYLE dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_PLOTSETTINGS dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_PLOTSTYLENAME dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_SCALELIST dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_TABLESTYLE dictionary
+2025-07-07 12:19:59,152 - INFO - creating ACAD_VISUALSTYLE dictionary
+2025-07-07 12:19:59,155 - INFO - did not write header var $INTERFEREOBJVS, value is None.
+2025-07-07 12:19:59,155 - INFO - did not write header var $INTERFEREVPVS, value is None.
+2025-07-07 12:19:59,158 - INFO - Points DXF file created successfully: output/points_drawing.dxf
+2025-07-07 12:19:59,158 - INFO - Creating DXF from JSON data...
+2025-07-07 12:19:59,158 - INFO - creating ACAD_COLOR dictionary
+2025-07-07 12:19:59,158 - INFO - creating ACAD_GROUP dictionary
+2025-07-07 12:19:59,158 - INFO - creating ACAD_LAYOUT dictionary
+2025-07-07 12:19:59,158 - INFO - creating ACAD_MATERIAL dictionary
+2025-07-07 12:19:59,158 - INFO - creating ACAD_MLEADERSTYLE dictionary
+2025-07-07 12:19:59,159 - INFO - creating ACAD_MLINESTYLE dictionary
+2025-07-07 12:19:59,159 - INFO - creating ACAD_PLOTSETTINGS dictionary
+2025-07-07 12:19:59,159 - INFO - creating ACAD_PLOTSTYLENAME dictionary
+2025-07-07 12:19:59,159 - INFO - creating ACAD_SCALELIST dictionary
+2025-07-07 12:19:59,159 - INFO - creating ACAD_TABLESTYLE dictionary
+2025-07-07 12:19:59,159 - INFO - creating ACAD_VISUALSTYLE dictionary
+2025-07-07 12:19:59,161 - INFO - did not write header var $INTERFEREOBJVS, value is None.
+2025-07-07 12:19:59,161 - INFO - did not write header var $INTERFEREVPVS, value is None.
+2025-07-07 12:19:59,164 - INFO - JSON DXF file created successfully: output/json_drawing.dxf
+2025-07-07 12:19:59,164 - INFO - Creating SolidWorks-style DXF drawing...
+2025-07-07 12:19:59,164 - INFO - creating ACAD_COLOR dictionary
+2025-07-07 12:19:59,164 - INFO - creating ACAD_GROUP dictionary
+2025-07-07 12:19:59,164 - INFO - creating ACAD_LAYOUT dictionary
+2025-07-07 12:19:59,164 - INFO - creating ACAD_MATERIAL dictionary
+2025-07-07 12:19:59,164 - INFO - creating ACAD_MLEADERSTYLE dictionary
+2025-07-07 12:19:59,164 - INFO - creating ACAD_MLINESTYLE dictionary
+2025-07-07 12:19:59,165 - INFO - creating ACAD_PLOTSETTINGS dictionary
+2025-07-07 12:19:59,165 - INFO - creating ACAD_PLOTSTYLENAME dictionary
+2025-07-07 12:19:59,165 - INFO - creating ACAD_SCALELIST dictionary
+2025-07-07 12:19:59,165 - INFO - creating ACAD_TABLESTYLE dictionary
+2025-07-07 12:19:59,165 - INFO - creating ACAD_VISUALSTYLE dictionary
+2025-07-07 12:19:59,168 - INFO - did not write header var $INTERFEREOBJVS, value is None.
+2025-07-07 12:19:59,168 - INFO - did not write header var $INTERFEREVPVS, value is None.
+2025-07-07 12:19:59,172 - INFO - SolidWorks-style DXF file created successfully: output/solidworks_style.dxf
+2025-07-07 12:19:59,172 - INFO - Found 4 DXF files in output directory
+2025-07-07 12:19:59,178 - INFO - DXF file validation successful: output/basic_drawing.dxf
+2025-07-07 12:19:59,178 - INFO - File contains 5 entities
+2025-07-07 12:19:59,184 - INFO - DXF file validation successful: output/points_drawing.dxf
+2025-07-07 12:19:59,184 - INFO - File contains 15 entities
+2025-07-07 12:19:59,189 - INFO - DXF file validation successful: output/json_drawing.dxf
+2025-07-07 12:19:59,189 - INFO - File contains 4 entities
+2025-07-07 12:19:59,195 - INFO - DXF file validation successful: output/solidworks_style.dxf
+2025-07-07 12:19:59,195 - INFO - File contains 16 entities
