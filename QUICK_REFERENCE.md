@@ -59,12 +59,14 @@ viewPositions(1, 2) = 0.25  ' Move view 1 up
 |---------|-----------|
 | "Open assembly first" | Make sure assembly is active window |
 | "Save assembly first" | Press Ctrl+S to save |
+| "Runtime Error 91" | Use `SimplifiedDrawingGenerator.swp` instead |
 | "Failed to create drawing" | Check SolidWorks installation |
 | Views don't appear | Check assembly complexity/geometry |
 
 ## Macro Files
+- `SimplifiedDrawingGenerator.swp` - **RECOMMENDED** (most reliable, avoids runtime errors)
+- `EnhancedDrawingGenerator.swp` - Advanced features (includes section views)
 - `GenerateMultipleDrawings.swp` - Basic version
-- `EnhancedDrawingGenerator.swp` - **Recommended** (better error handling)
 
 ## Support Files
 - `SOLIDWORKS_MACRO_DOCUMENTATION.md` - Complete documentation

@@ -8,6 +8,7 @@ This collection of SolidWorks VBA macros automatically generates multiple techni
 
 1. **GenerateMultipleDrawings.swp** - Basic version of the macro
 2. **EnhancedDrawingGenerator.swp** - Enhanced version with better error handling and customization
+3. **SimplifiedDrawingGenerator.swp** - **NEW** Simplified version to avoid runtime errors
 
 ## Features
 
@@ -50,13 +51,34 @@ This collection of SolidWorks VBA macros automatically generates multiple techni
 2. Save the assembly (macro requires a saved file)
 3. Load the macro file (.swp) into SolidWorks
 
+## Which Version to Use
+
+### SimplifiedDrawingGenerator.swp (RECOMMENDED for most users)
+- **Best for**: Users experiencing runtime errors or template issues
+- **Pros**: Most reliable, works with default SolidWorks templates
+- **Cons**: Basic orthographic views only (no section views)
+- **Use when**: Getting "Runtime Error 91" or template path issues
+
+### EnhancedDrawingGenerator.swp 
+- **Best for**: Advanced users with proper SolidWorks template setup
+- **Pros**: Full feature set including section views and detail views
+- **Cons**: Requires specific template configuration
+- **Use when**: You need section views and have no runtime errors
+
+### GenerateMultipleDrawings.swp
+- **Best for**: Educational purposes or customization base
+- **Pros**: Simple code structure, easy to understand
+- **Cons**: Limited error handling
+- **Use when**: Learning VBA or creating custom versions
+
 ## Installation and Usage
 
 ### Step 1: Load the Macro
 1. In SolidWorks, go to **Tools > Macro > Run**
-2. Browse to select either macro file:
+2. Browse to select the appropriate macro file:
+   - `SimplifiedDrawingGenerator.swp` (**recommended first try**)
+   - `EnhancedDrawingGenerator.swp` (if you need section views)
    - `GenerateMultipleDrawings.swp` (basic version)
-   - `EnhancedDrawingGenerator.swp` (recommended)
 3. Click **Open**
 
 ### Step 2: Run the Macro
@@ -144,6 +166,10 @@ End Function
 #### Section views not creating properly
 - **Cause**: Parent view selection issues
 - **Solution**: Ensure assembly has sufficient geometry for section views
+
+#### "Runtime Error 91: Object variable or With block variable not set"
+- **Cause**: Sheet or drawing objects not properly initialized
+- **Solution**: Use the **SimplifiedDrawingGenerator.swp** instead, or ensure proper SolidWorks template setup
 
 ### Advanced Troubleshooting
 

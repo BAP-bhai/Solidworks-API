@@ -98,7 +98,22 @@ Function CreateDrawingWithViews(assemblyPath As String, assemblyName As String, 
     End If
     
     Set swDrawing = swDrawDoc
+    
+    ' Validate drawing object
+    If swDrawing Is Nothing Then
+        MsgBox "Failed to initialize drawing object for drawing " & drawingNumber
+        CreateDrawingWithViews = False
+        Exit Function
+    End If
+    
     Set swSheet = swDrawing.GetCurrentSheet
+    
+    ' Validate sheet object  
+    If swSheet Is Nothing Then
+        MsgBox "Failed to get current sheet for drawing " & drawingNumber
+        CreateDrawingWithViews = False
+        Exit Function
+    End If
     
     ' Configure sheet properties
     Call ConfigureSheet()
@@ -139,12 +154,40 @@ End Function
 
 Sub ConfigureSheet()
     
+    ' Validate objects before use
+    If swSheet Is Nothing Then
+        MsgBox "Error: Sheet object not initialized"
+        Exit Sub
+    End If
+    
+    If swDrawing Is Nothing Then
+        MsgBox "Error: Drawing object not initialized"
+        Exit Sub
+    End If
+    
     ' Set sheet scale and properties
-    swSheet.SetScale 1, 2, True, True
-    swSheet.SetSize swDwgPaperSizes_e.swDwgPapersUserDefined, 0.42, 0.297  ' A3 size
+    On Error GoTo ErrorHandler
+    
+    boolstatus = swSheet.SetScale(1, 2, True, True)
+    If Not boolstatus Then
+        MsgBox "Warning: Failed to set sheet scale"
+    End If
+    
+    boolstatus = swSheet.SetSize(swDwgPaperSizes_e.swDwgPapersUserDefined, 0.42, 0.297)  ' A3 size
+    If Not boolstatus Then
+        MsgBox "Warning: Failed to set sheet size"
+    End If
     
     ' Set drawing standards
-    swDrawing.SetCurrentSheetType swSheetTypes_e.swSheetDrawing
+    boolstatus = swDrawing.SetCurrentSheetType(swSheetTypes_e.swSheetDrawing)
+    If Not boolstatus Then
+        MsgBox "Warning: Failed to set sheet type"
+    End If
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error in ConfigureSheet: " & Err.Description & " (Error " & Err.Number & ")"
     
 End Sub
 

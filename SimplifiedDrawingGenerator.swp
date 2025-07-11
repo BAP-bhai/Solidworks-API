@@ -1,0 +1,326 @@
+Dim swApp As SldWorks.SldWorks
+Dim swModel As SldWorks.ModelDoc2
+Dim swDrawing As SldWorks.DrawingDoc
+Dim swView As SldWorks.View
+Dim swSheet As SldWorks.Sheet
+Dim boolstatus As Boolean
+Dim longstatus As Long, longwarnings As Long
+
+' Configuration constants
+Const NUM_DRAWINGS As Integer = 3
+Const VIEWS_PER_DRAWING As Integer = 4
+Const DEFAULT_SCALE As Double = 0.5
+
+Sub main()
+    
+    Set swApp = Application.SldWorks
+    
+    ' Basic validation
+    If swApp Is Nothing Then
+        MsgBox "SolidWorks application not found."
+        Exit Sub
+    End If
+    
+    Set swModel = swApp.ActiveDoc
+    
+    If swModel Is Nothing Then
+        MsgBox "Please open an assembly document first."
+        Exit Sub
+    End If
+    
+    If swModel.GetType <> swDocumentTypes_e.swDocASSEMBLY Then
+        MsgBox "Active document must be an assembly."
+        Exit Sub
+    End If
+    
+    If swModel.GetPathName = "" Then
+        MsgBox "Please save the assembly before running this macro."
+        Exit Sub
+    End If
+    
+    ' Get assembly information
+    Dim assemblyPath As String
+    Dim assemblyName As String
+    assemblyPath = swModel.GetPathName
+    assemblyName = swModel.GetTitle
+    
+    ' Create multiple drawings
+    Dim i As Integer
+    Dim successCount As Integer
+    successCount = 0
+    
+    For i = 1 To NUM_DRAWINGS
+        If CreateSimpleDrawing(assemblyPath, assemblyName, i) Then
+            successCount = successCount + 1
+        End If
+    Next i
+    
+    MsgBox "Successfully created " & successCount & " out of " & NUM_DRAWINGS & " drawings."
+    
+End Sub
+
+Function CreateSimpleDrawing(assemblyPath As String, assemblyName As String, drawingNumber As Integer) As Boolean
+    
+    On Error GoTo ErrorHandler
+    
+    ' Create new drawing document with default template
+    Dim swDrawDoc As SldWorks.ModelDoc2
+    Set swDrawDoc = swApp.NewDocument("", swDocumentTypes_e.swDocDRAWING, 0, 0)
+    
+    If swDrawDoc Is Nothing Then
+        MsgBox "Failed to create drawing document " & drawingNumber
+        CreateSimpleDrawing = False
+        Exit Function
+    End If
+    
+    Set swDrawing = swDrawDoc
+    Set swSheet = swDrawing.GetCurrentSheet
+    
+    ' Simple sheet configuration (minimal to avoid errors)
+    If Not swSheet Is Nothing Then
+        ' Only set scale if sheet object is valid
+        On Error Resume Next
+        swSheet.SetScale 1, 4, True, True  ' 1:4 scale
+        On Error GoTo ErrorHandler
+    End If
+    
+    ' Define view positions
+    Dim viewPositions(1 To 4, 1 To 2) As Double
+    Call SetSimplePositions(viewPositions)
+    
+    ' Create views based on drawing number
+    Dim viewsCreated As Integer
+    viewsCreated = CreateSimpleViewSet(assemblyPath, viewPositions, drawingNumber)
+    
+    If viewsCreated >= 3 Then  ' Accept if at least 3 views created
+        ' Save the drawing
+        Dim drawingPath As String
+        Dim basePath As String
+        basePath = Left(assemblyPath, InStrRev(assemblyPath, "\"))
+        drawingPath = basePath & assemblyName & "_Drawing_" & Format(drawingNumber, "00") & ".slddrw"
+        
+        boolstatus = swDrawDoc.SaveAs(drawingPath)
+        CreateSimpleDrawing = boolstatus
+    Else
+        MsgBox "Only created " & viewsCreated & " views for drawing " & drawingNumber
+        CreateSimpleDrawing = False
+    End If
+    
+    Exit Function
+    
+ErrorHandler:
+    MsgBox "Error creating drawing " & drawingNumber & ": " & Err.Description
+    CreateSimpleDrawing = False
+    
+End Function
+
+Sub SetSimplePositions(ByRef viewPositions As Variant)
+    
+    ' Simple positions for reliable placement
+    ' Top-left
+    viewPositions(1, 1) = 0.05  ' X position (meters)
+    viewPositions(1, 2) = 0.15  ' Y position (meters)
+    
+    ' Top-right
+    viewPositions(2, 1) = 0.25  ' X position
+    viewPositions(2, 2) = 0.15  ' Y position
+    
+    ' Bottom-left
+    viewPositions(3, 1) = 0.05  ' X position
+    viewPositions(3, 2) = 0.05  ' Y position
+    
+    ' Bottom-right
+    viewPositions(4, 1) = 0.25  ' X position
+    viewPositions(4, 2) = 0.05  ' Y position
+    
+End Sub
+
+Function CreateSimpleViewSet(assemblyPath As String, viewPositions As Variant, drawingNumber As Integer) As Integer
+    
+    Dim viewCount As Integer
+    viewCount = 0
+    
+    Select Case drawingNumber
+        Case 1
+            viewCount = CreateViews_Set1(assemblyPath, viewPositions)
+        Case 2
+            viewCount = CreateViews_Set2(assemblyPath, viewPositions)
+        Case 3
+            viewCount = CreateViews_Set3(assemblyPath, viewPositions)
+        Case Else
+            viewCount = CreateViews_Default(assemblyPath, viewPositions)
+    End Select
+    
+    CreateSimpleViewSet = viewCount
+    
+End Function
+
+Function CreateViews_Set1(assemblyPath As String, viewPositions As Variant) As Integer
+    
+    Dim viewCount As Integer
+    viewCount = 0
+    
+    ' Create basic orthographic views
+    On Error Resume Next
+    
+    ' View 1: Front view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Front", _
+        viewPositions(1, 1), viewPositions(1, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = DEFAULT_SCALE
+        viewCount = viewCount + 1
+    End If
+    
+    ' View 2: Top view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Top", _
+        viewPositions(2, 1), viewPositions(2, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = DEFAULT_SCALE
+        viewCount = viewCount + 1
+    End If
+    
+    ' View 3: Right view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Right", _
+        viewPositions(3, 1), viewPositions(3, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = DEFAULT_SCALE
+        viewCount = viewCount + 1
+    End If
+    
+    ' View 4: Isometric view (as backup instead of section view)
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Isometric", _
+        viewPositions(4, 1), viewPositions(4, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = 0.4
+        viewCount = viewCount + 1
+    End If
+    
+    On Error GoTo 0
+    CreateViews_Set1 = viewCount
+    
+End Function
+
+Function CreateViews_Set2(assemblyPath As String, viewPositions As Variant) As Integer
+    
+    Dim viewCount As Integer
+    viewCount = 0
+    
+    On Error Resume Next
+    
+    ' View 1: Isometric view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Isometric", _
+        viewPositions(1, 1), viewPositions(1, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = 0.4
+        viewCount = viewCount + 1
+    End If
+    
+    ' View 2: Front view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Front", _
+        viewPositions(2, 1), viewPositions(2, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = DEFAULT_SCALE
+        viewCount = viewCount + 1
+    End If
+    
+    ' View 3: Right view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Right", _
+        viewPositions(3, 1), viewPositions(3, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = DEFAULT_SCALE
+        viewCount = viewCount + 1
+    End If
+    
+    ' View 4: Top view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Top", _
+        viewPositions(4, 1), viewPositions(4, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = DEFAULT_SCALE
+        viewCount = viewCount + 1
+    End If
+    
+    On Error GoTo 0
+    CreateViews_Set2 = viewCount
+    
+End Function
+
+Function CreateViews_Set3(assemblyPath As String, viewPositions As Variant) As Integer
+    
+    Dim viewCount As Integer
+    viewCount = 0
+    
+    On Error Resume Next
+    
+    ' View 1: Left view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Left", _
+        viewPositions(1, 1), viewPositions(1, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = DEFAULT_SCALE
+        viewCount = viewCount + 1
+    End If
+    
+    ' View 2: Bottom view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Bottom", _
+        viewPositions(2, 1), viewPositions(2, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = DEFAULT_SCALE
+        viewCount = viewCount + 1
+    End If
+    
+    ' View 3: Back view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Back", _
+        viewPositions(3, 1), viewPositions(3, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = DEFAULT_SCALE
+        viewCount = viewCount + 1
+    End If
+    
+    ' View 4: Isometric (wireframe)
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Isometric", _
+        viewPositions(4, 1), viewPositions(4, 2), 0)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = 0.3
+        swView.SetDisplayMode5 swDisplayMode_e.swWIREFRAME, True, True
+        viewCount = viewCount + 1
+    End If
+    
+    On Error GoTo 0
+    CreateViews_Set3 = viewCount
+    
+End Function
+
+Function CreateViews_Default(assemblyPath As String, viewPositions As Variant) As Integer
+    
+    Dim viewCount As Integer
+    viewCount = 0
+    
+    On Error Resume Next
+    
+    ' Default set: Front, Right, Top, Isometric
+    Dim viewNames(1 To 4) As String
+    Dim scales(1 To 4) As Double
+    
+    viewNames(1) = "*Front"
+    viewNames(2) = "*Right"
+    viewNames(3) = "*Top"
+    viewNames(4) = "*Isometric"
+    
+    scales(1) = DEFAULT_SCALE
+    scales(2) = DEFAULT_SCALE
+    scales(3) = DEFAULT_SCALE
+    scales(4) = 0.4
+    
+    Dim i As Integer
+    For i = 1 To 4
+        Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, viewNames(i), _
+            viewPositions(i, 1), viewPositions(i, 2), 0)
+        If Not swView Is Nothing Then
+            swView.ScaleDecimal = scales(i)
+            viewCount = viewCount + 1
+        End If
+    Next i
+    
+    On Error GoTo 0
+    CreateViews_Default = viewCount
+    
+End Function
