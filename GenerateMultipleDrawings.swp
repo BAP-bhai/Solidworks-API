@@ -1,0 +1,232 @@
+Dim swApp As SldWorks.SldWorks
+Dim swModel As SldWorks.ModelDoc2
+Dim swDrawing As SldWorks.DrawingDoc
+Dim swView As SldWorks.View
+Dim swSheet As SldWorks.Sheet
+Dim boolstatus As Boolean
+Dim longstatus As Long, longwarnings As Long
+
+Sub main()
+    
+    Set swApp = Application.SldWorks
+    
+    ' Get the active document (should be an assembly)
+    Set swModel = swApp.ActiveDoc
+    
+    If swModel Is Nothing Then
+        MsgBox "Please open an assembly document first."
+        Exit Sub
+    End If
+    
+    If swModel.GetType <> swDocumentTypes_e.swDocASSEMBLY Then
+        MsgBox "Active document must be an assembly."
+        Exit Sub
+    End If
+    
+    ' Get assembly file path and name for reference
+    Dim assemblyPath As String
+    Dim assemblyName As String
+    assemblyPath = swModel.GetPathName
+    assemblyName = swModel.GetTitle
+    
+    ' Create multiple drawings (let's create 3 drawings as an example)
+    Dim numDrawings As Integer
+    numDrawings = 3
+    
+    Dim i As Integer
+    For i = 1 To numDrawings
+        Call CreateDrawingWithViews(assemblyPath, assemblyName, i)
+    Next i
+    
+    MsgBox "Successfully created " & numDrawings & " drawings with section views."
+    
+End Sub
+
+Sub CreateDrawingWithViews(assemblyPath As String, assemblyName As String, drawingNumber As Integer)
+    
+    ' Create new drawing document
+    Dim swDrawDoc As SldWorks.ModelDoc2
+    Set swDrawDoc = swApp.NewDocument("C:\ProgramData\SOLIDWORKS\SOLIDWORKS 2023\lang\english\sheetformat\a3 - landscape.slddrt", 0, 0, 0)
+    Set swDrawing = swDrawDoc
+    
+    ' Get the active sheet
+    Set swSheet = swDrawing.GetCurrentSheet
+    
+    ' Set sheet scale
+    swSheet.SetScale 1, 2, True, True
+    
+    ' Define view positions (4 views per drawing)
+    Dim viewPositions(1 To 4, 1 To 2) As Double
+    
+    ' Top-left view
+    viewPositions(1, 1) = 0.1  ' X position
+    viewPositions(1, 2) = 0.7  ' Y position
+    
+    ' Top-right view  
+    viewPositions(2, 1) = 0.6  ' X position
+    viewPositions(2, 2) = 0.7  ' Y position
+    
+    ' Bottom-left view
+    viewPositions(3, 1) = 0.1  ' X position
+    viewPositions(3, 2) = 0.3  ' Y position
+    
+    ' Bottom-right view
+    viewPositions(4, 1) = 0.6  ' X position
+    viewPositions(4, 2) = 0.3  ' Y position
+    
+    ' Create drawing views based on drawing number
+    Select Case drawingNumber
+        Case 1
+            Call CreateDrawingViews_Set1(assemblyPath, viewPositions)
+        Case 2
+            Call CreateDrawingViews_Set2(assemblyPath, viewPositions)
+        Case 3
+            Call CreateDrawingViews_Set3(assemblyPath, viewPositions)
+        Case Else
+            Call CreateDrawingViews_Default(assemblyPath, viewPositions)
+    End Select
+    
+    ' Save the drawing
+    Dim drawingPath As String
+    Dim basePath As String
+    basePath = Left(assemblyPath, InStrRev(assemblyPath, "\"))
+    drawingPath = basePath & assemblyName & "_Drawing_" & drawingNumber & ".slddrw"
+    
+    swDrawDoc.SaveAs drawingPath
+    
+End Sub
+
+Sub CreateDrawingViews_Set1(assemblyPath As String, viewPositions As Variant)
+    
+    ' View 1: Front view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Front", _
+        viewPositions(1, 1), viewPositions(1, 2), 0)
+    swView.ScaleDecimal = 0.5
+    
+    ' View 2: Top view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Top", _
+        viewPositions(2, 1), viewPositions(2, 2), 0)
+    swView.ScaleDecimal = 0.5
+    
+    ' View 3: Right view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Right", _
+        viewPositions(3, 1), viewPositions(3, 2), 0)
+    swView.ScaleDecimal = 0.5
+    
+    ' View 4: Section view A-A (vertical section through front view)
+    Dim frontView As SldWorks.View
+    Set frontView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Front", _
+        viewPositions(1, 1), viewPositions(1, 2), 0)
+    
+    ' Create section line on front view first
+    swDrawing.ClearSelection2 True
+    swDrawing.ActivateView "Drawing View1"
+    
+    ' Create section view
+    Set swView = swDrawing.CreateSectionViewAt5(viewPositions(4, 1), viewPositions(4, 2), 0, "A", swCreateSectionViewAtOptions_e.swCreateSectionView_OffsetSection)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = 0.5
+    End If
+    
+End Sub
+
+Sub CreateDrawingViews_Set2(assemblyPath As String, viewPositions As Variant)
+    
+    ' View 1: Isometric view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Isometric", _
+        viewPositions(1, 1), viewPositions(1, 2), 0)
+    swView.ScaleDecimal = 0.4
+    
+    ' View 2: Front view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Front", _
+        viewPositions(2, 1), viewPositions(2, 2), 0)
+    swView.ScaleDecimal = 0.5
+    
+    ' View 3: Section view B-B (horizontal section)
+    Set swView = swDrawing.CreateSectionViewAt5(viewPositions(3, 1), viewPositions(3, 2), 0, "B", swCreateSectionViewAtOptions_e.swCreateSectionView_OffsetSection)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = 0.5
+    End If
+    
+    ' View 4: Detail view
+    Set swView = swDrawing.CreateDetailViewAt4(viewPositions(4, 1), viewPositions(4, 2), 0, swDetailViewStyles_e.swDetailCircle, 0.02, 0.02, "C")
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = 2#
+    End If
+    
+End Sub
+
+Sub CreateDrawingViews_Set3(assemblyPath As String, viewPositions As Variant)
+    
+    ' View 1: Left view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Left", _
+        viewPositions(1, 1), viewPositions(1, 2), 0)
+    swView.ScaleDecimal = 0.5
+    
+    ' View 2: Bottom view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Bottom", _
+        viewPositions(2, 1), viewPositions(2, 2), 0)
+    swView.ScaleDecimal = 0.5
+    
+    ' View 3: Section view C-C (diagonal section)
+    Set swView = swDrawing.CreateSectionViewAt5(viewPositions(3, 1), viewPositions(3, 2), 0, "C", swCreateSectionViewAtOptions_e.swCreateSectionView_OffsetSection)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = 0.5
+    End If
+    
+    ' View 4: Auxiliary view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Isometric", _
+        viewPositions(4, 1), viewPositions(4, 2), 0)
+    swView.ScaleDecimal = 0.3
+    swView.SetDisplayMode5 swDisplayMode_e.swWIREFRAME, True, True
+    
+End Sub
+
+Sub CreateDrawingViews_Default(assemblyPath As String, viewPositions As Variant)
+    
+    ' Default set of views for additional drawings
+    ' View 1: Front view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Front", _
+        viewPositions(1, 1), viewPositions(1, 2), 0)
+    swView.ScaleDecimal = 0.5
+    
+    ' View 2: Right view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Right", _
+        viewPositions(2, 1), viewPositions(2, 2), 0)
+    swView.ScaleDecimal = 0.5
+    
+    ' View 3: Top view
+    Set swView = swDrawing.CreateDrawViewFromModelView3(assemblyPath, "*Top", _
+        viewPositions(3, 1), viewPositions(3, 2), 0)
+    swView.ScaleDecimal = 0.5
+    
+    ' View 4: Section view
+    Set swView = swDrawing.CreateSectionViewAt5(viewPositions(4, 1), viewPositions(4, 2), 0, "D", swCreateSectionViewAtOptions_e.swCreateSectionView_OffsetSection)
+    If Not swView Is Nothing Then
+        swView.ScaleDecimal = 0.5
+    End If
+    
+End Sub
+
+' Helper function to create section lines
+Sub CreateSectionLine(startX As Double, startY As Double, endX As Double, endY As Double)
+    
+    Dim sketchManager As SldWorks.SketchManager
+    Set sketchManager = swModel.SketchManager
+    
+    ' Create a sketch for the section line
+    boolstatus = swDrawing.EditSketch
+    sketchManager.CreateLine startX, startY, 0, endX, endY, 0
+    swDrawing.InsertSketch2 True
+    
+End Sub
+
+' Additional helper function to set view properties
+Sub SetViewProperties(view As SldWorks.View, scale As Double, displayMode As swDisplayMode_e)
+    
+    If Not view Is Nothing Then
+        view.ScaleDecimal = scale
+        view.SetDisplayMode5 displayMode, True, True
+    End If
+    
+End Sub
