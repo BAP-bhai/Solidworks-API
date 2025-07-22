@@ -114,11 +114,35 @@ Sub CreateAssemblySectionDrawing()
                                 swDwgTemplates_e.swDwgTemplateAsize, 1, 1, True, "", 0.42, 0.297, "Default", False)
     
     ' Insert top view of the assembly
-    Set swView = swDrawing.CreateDrawViewFromModelDoc3(swAssy.GetPathName, "*Top", _
-                                                      0.21, 0.21, 0) ' Center position for A3 sheet
+    ' Method 1: Try using CreateDrawViewFromModelDoc with proper parameters
+    swModel.ClearSelection2 True
+    Set swView = swDrawing.CreateDrawViewFromModelDoc(swAssy.GetPathName, 0.21, 0.21, 0)
+    
+    If Not swView Is Nothing Then
+        ' Set the view to top orientation
+        swView.SetOrientation2 swIsometricViewOrientation_e.swTopViewOrientation, True
+    Else
+        ' Method 2: Alternative approach using InsertModelInPredefinedView
+        swModel.ClearSelection2 True
+        bRet = swModel.Extension.SelectByID2("", "FACE", 0, 0, 0, False, 0, Nothing, 0)
+        Set swView = swDrawing.InsertModelInPredefinedView(swAssy.GetPathName)
+        
+        If Not swView Is Nothing Then
+            ' Set view orientation to top
+            swView.SetOrientation2 swIsometricViewOrientation_e.swTopViewOrientation, True
+            ' Position the view
+            swView.Position = Array(0.21, 0.21)
+        Else
+            ' Method 3: Create view using CreateDrawViewFromModelDoc2
+            Set swView = swDrawing.CreateDrawViewFromModelDoc2(swAssy.GetPathName, 0.21, 0.21)
+            If Not swView Is Nothing Then
+                swView.SetOrientation2 swIsometricViewOrientation_e.swTopViewOrientation, True
+            End If
+        End If
+    End If
     
     If swView Is Nothing Then
-        MsgBox "Failed to create top view."
+        MsgBox "Failed to create top view. Please ensure the assembly is saved."
         Exit Sub
     End If
     
@@ -172,10 +196,30 @@ Sub CreateAssemblySectionDrawing()
     swModel.ClearSelection2 True
     bRet = swModel.Extension.SelectByID2("Line1", "SKETCHSEGMENT", 0, 0, 0, False, 0, Nothing, 0)
     
-    ' Create section view
-    Set swSectionView = swDrawing.CreateSectionViewAt5(0.21, 0.1, 0, "A", _
-                                                      swCreateSectionViewAtOptions_e.swCreateSectionView_OffsetSection, _
-                                                      Nothing, 0.01)
+    If Not bRet Then
+        ' Try selecting with different approach
+        bRet = swModel.Extension.SelectByID2("Line1@Sketch1", "SKETCHSEGMENT", 0, 0, 0, False, 0, Nothing, 0)
+    End If
+    
+    ' Create section view using different methods
+    If bRet Then
+        ' Method 1: Try CreateSectionViewAt5
+        Set swSectionView = swDrawing.CreateSectionViewAt5(0.21, 0.1, 0, "A", _
+                                                          swCreateSectionViewAtOptions_e.swCreateSectionView_OffsetSection, _
+                                                          Nothing, 0.01)
+        
+        ' Method 2: If that fails, try CreateSectionViewAt4
+        If swSectionView Is Nothing Then
+            Set swSectionView = swDrawing.CreateSectionViewAt4(0.21, 0.1, 0, "A", _
+                                                              swCreateSectionViewAtOptions_e.swCreateSectionView_OffsetSection, _
+                                                              Nothing)
+        End If
+        
+        ' Method 3: If that fails, try basic CreateSectionViewAt
+        If swSectionView Is Nothing Then
+            Set swSectionView = swDrawing.CreateSectionViewAt(0.21, 0.1, "A")
+        End If
+    End If
     
     If swSectionView Is Nothing Then
         MsgBox "Failed to create section view. Please check if the section line is properly selected."
