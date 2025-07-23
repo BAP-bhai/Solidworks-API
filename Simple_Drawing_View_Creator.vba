@@ -39,16 +39,27 @@ Sub CreateDrawingWithUserView()
     ' Clear any selections
     swModel.ClearSelection2 True
     
-    ' Show message to user
+    ' Show message to user with instruction to create view
     MsgBox "A new A3 drawing has been created." & vbCrLf & vbCrLf & _
            "Next steps:" & vbCrLf & _
            "1. Go to Insert > Drawing Views > Model" & vbCrLf & _
            "2. Browse and select your model file" & vbCrLf & _
            "3. Choose the view orientation (Top, Front, etc.)" & vbCrLf & _
-           "4. Place the view on the drawing sheet" & vbCrLf & _
-           "5. Click OK in this dialog when you're done", vbInformation, "Insert Drawing View"
+           "4. Place the view on the drawing sheet" & vbCrLf & vbCrLf & _
+           "Click OK to continue...", vbInformation, "Create Your Drawing View"
     
-    ' Wait for user to create the view, then find it
+    ' Now wait for user to actually create the view
+    Dim userResponse As VbMsgBoxResult
+    userResponse = MsgBox("Have you finished creating the drawing view?" & vbCrLf & vbCrLf & _
+                         "Click YES if you have created the view" & vbCrLf & _
+                         "Click NO to cancel", vbYesNo + vbQuestion, "View Creation Complete?")
+    
+    If userResponse = vbNo Then
+        MsgBox "Macro cancelled by user.", vbInformation
+        Exit Sub
+    End If
+    
+    ' Now look for the created view
     Dim swFirstView As SldWorks.View
     Set swFirstView = swDrawing.GetFirstView
     
