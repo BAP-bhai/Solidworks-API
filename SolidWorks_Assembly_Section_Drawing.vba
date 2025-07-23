@@ -270,12 +270,18 @@ Sub AlternativeCreateSectionView()
     
     Set swApp = Application.SldWorks
     Set swModel = swApp.ActiveDoc
-    Set swDrawing = swModel
     
-    If swDrawing Is Nothing Then
-        MsgBox "Please run the main macro first to create the drawing."
+    If swModel Is Nothing Then
+        MsgBox "No active document found."
         Exit Sub
     End If
+    
+    If swModel.GetType <> swDocDRAWING Then
+        MsgBox "Active document must be a drawing. Please run the main macro first."
+        Exit Sub
+    End If
+    
+    Set swDrawing = swModel
     
     ' Get the first view (should be the top view)
     Dim swFirstView As SldWorks.View
