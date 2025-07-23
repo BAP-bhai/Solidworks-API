@@ -123,69 +123,15 @@ Sub CreateAssemblySectionDrawing()
     ' Make sure the drawing is active
     swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
     
-    ' STEP 5: Insert top view of the assembly using reliable method
-    ' Based on the working code you provided, adapted for standard view creation
-    
-    Set swModel = swDrawing
+    ' STEP 5: Insert top view of the assembly - SIMPLIFIED
     swModel.ClearSelection2 True
     
-    ' First, try to create a standard orthographic view using CreateOrthogonalViewAt3
-    ' This method is similar to CreateAuxiliaryViewAt2 but for orthographic views
-    Set swView = swDrawing.CreateOrthogonalViewAt3(0.21, 0.21, 0, swStandardViews_e.swTopView, False, "")
+    ' Create auxiliary view using the method from your working code
+    Set swView = swDrawing.CreateAuxiliaryViewAt2(0.21, 0.21, 0, False, "TopView", True, True)
     
-    ' If that fails, try using CreateAuxiliaryViewAt2 and then modify it to top view
-    If swView Is Nothing Then
-        ' Create auxiliary view first (we know this method works from your code)
-        Set swView = swDrawing.CreateAuxiliaryViewAt2(0.21, 0.21, 0, False, "View1", True, True)
-        
-        ' If auxiliary view was created, modify it to be a top view
-        If Not swView Is Nothing Then
-            swView.SetOrientation2 swStandardViews_e.swTopView, True
-        End If
-    End If
-    
-    ' If both methods fail, try the basic CreateDrawViewFromModelDoc3 approach
-    If swView Is Nothing Then
-        ' Make sure we have the assembly document path
-        If swAssy.GetPathName <> "" Then
-            ' Activate the assembly document first
-            swApp.ActivateDoc2 swAssy.GetTitle, False, 0
-            ' Then activate the drawing
-            swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
-            
-            ' Try the method that sometimes works
-            Set swView = swDrawing.CreateDrawViewFromModelDoc3(swAssy.GetPathName, "*Top", 0.21, 0.21, 0)
-        End If
-    End If
-    
-    ' Last resort: Check if there's already a view and use it
-    If swView Is Nothing Then
-        Dim swFirstView As SldWorks.View
-        Set swFirstView = swDrawing.GetFirstView
-        If Not swFirstView Is Nothing Then
-            Set swView = swFirstView.GetNextView
-            
-            ' Look through existing views
-            If swView Is Nothing Then
-                Dim swViews As Variant
-                swViews = swDrawing.GetViews
-                If IsArray(swViews) And UBound(swViews) >= 0 Then
-                    Dim swSheetViews As Variant
-                    swSheetViews = swViews(0)
-                    If IsArray(swSheetViews) And UBound(swSheetViews) > 0 Then
-                        Dim k As Integer
-                        For k = 1 To UBound(swSheetViews)
-                            If k <= UBound(swSheetViews) Then
-                                Set swView = swSheetViews(k)
-                                If Not swView Is Nothing Then
-                                    Exit For
-                                End If
-                            End If
-                        Next k
-                    End If
-                End If
-            End If
-        End If
+    ' If auxiliary view created, set it to top orientation
+    If Not swView Is Nothing Then
+        swView.SetOrientation2 swStandardViews_e.swTopView, True
     End If
     
     If swView Is Nothing Then
