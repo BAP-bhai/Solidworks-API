@@ -123,61 +123,57 @@ Sub CreateAssemblySectionDrawing()
     ' Make sure the drawing is active
     swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
     
-    ' STEP 5 MODIFIED: Create a placeholder view for now and let user know
-    ' Since automatic view creation is having API compatibility issues,
-    ' we'll create a basic setup and inform the user
+    ' STEP 5: Insert top view of the assembly using reliable method
+    ' Based on the working code you provided, adapted for standard view creation
     
     Set swModel = swDrawing
     swModel.ClearSelection2 True
     
-    ' Check if there's already a view in the drawing
-    Dim swFirstView As SldWorks.View
-    Set swFirstView = swDrawing.GetFirstView
-    If Not swFirstView Is Nothing Then
-        Set swView = swFirstView.GetNextView
+    ' First, try to create a standard orthographic view using CreateOrthogonalViewAt3
+    ' This method is similar to CreateAuxiliaryViewAt2 but for orthographic views
+    Set swView = swDrawing.CreateOrthogonalViewAt3(0.21, 0.21, 0, swStandardViews_e.swTopView, False, "")
+    
+    ' If that fails, try using CreateAuxiliaryViewAt2 and then modify it to top view
+    If swView Is Nothing Then
+        ' Create auxiliary view first (we know this method works from your code)
+        Set swView = swDrawing.CreateAuxiliaryViewAt2(0.21, 0.21, 0, False, "View1", True, True)
         
-        ' Look through all views to find any existing drawing view
-        If swView Is Nothing Then
-            Dim swViews As Variant
-            swViews = swDrawing.GetViews
-            If IsArray(swViews) And UBound(swViews) >= 0 Then
-                Dim swSheetViews As Variant
-                swSheetViews = swViews(0)
-                If IsArray(swSheetViews) And UBound(swSheetViews) > 0 Then
-                    Dim k As Integer
-                    For k = 1 To UBound(swSheetViews)
-                        If k <= UBound(swSheetViews) Then
-                            Set swView = swSheetViews(k)
-                            If Not swView Is Nothing Then
-                                ' Found a view, use it
-                                Exit For
-                            End If
-                        End If
-                    Next k
-                End If
-            End If
+        ' If auxiliary view was created, modify it to be a top view
+        If Not swView Is Nothing Then
+            swView.SetOrientation2 swStandardViews_e.swTopView, True
         End If
     End If
     
-    ' If no view found, pause and ask user to create one
+    ' If both methods fail, try the basic CreateDrawViewFromModelDoc3 approach
     If swView Is Nothing Then
-        MsgBox "Due to API compatibility issues, please manually create the top view now:" & vbCrLf & vbCrLf & _
-               "1. Go to Insert > Drawing Views > Model" & vbCrLf & _
-               "2. Select file: " & swAssy.GetPathName & vbCrLf & _
-               "3. Place the view on the drawing" & vbCrLf & _
-               "4. Set to Top orientation" & vbCrLf & _
-               "5. Click OK here when done", vbExclamation, "Manual View Creation Required"
-        
-        ' Check again for the view
+        ' Make sure we have the assembly document path
+        If swAssy.GetPathName <> "" Then
+            ' Activate the assembly document first
+            swApp.ActivateDoc2 swAssy.GetTitle, False, 0
+            ' Then activate the drawing
+            swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
+            
+            ' Try the method that sometimes works
+            Set swView = swDrawing.CreateDrawViewFromModelDoc3(swAssy.GetPathName, "*Top", 0.21, 0.21, 0)
+        End If
+    End If
+    
+    ' Last resort: Check if there's already a view and use it
+    If swView Is Nothing Then
+        Dim swFirstView As SldWorks.View
         Set swFirstView = swDrawing.GetFirstView
         If Not swFirstView Is Nothing Then
             Set swView = swFirstView.GetNextView
             
+            ' Look through existing views
             If swView Is Nothing Then
+                Dim swViews As Variant
                 swViews = swDrawing.GetViews
                 If IsArray(swViews) And UBound(swViews) >= 0 Then
+                    Dim swSheetViews As Variant
                     swSheetViews = swViews(0)
                     If IsArray(swSheetViews) And UBound(swSheetViews) > 0 Then
+                        Dim k As Integer
                         For k = 1 To UBound(swSheetViews)
                             If k <= UBound(swSheetViews) Then
                                 Set swView = swSheetViews(k)
