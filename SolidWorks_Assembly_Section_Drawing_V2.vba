@@ -110,42 +110,55 @@ Sub CreateAssemblySectionDrawing()
     ' STEP 5: Insert top view of the assembly
     swModel.ClearSelection2 True
     
-    ' Simple approach: Ask user to create the view, then continue with the macro
-    MsgBox "STEP 5: Please create a top view of the assembly now." & vbCrLf & vbCrLf & _
-           "Instructions:" & vbCrLf & _
-           "1. Go to Insert > Drawing Views > Model" & vbCrLf & _
-           "2. Browse and select your assembly file: " & swAssy.GetPathName & vbCrLf & _
-           "3. Place the view anywhere on the drawing sheet" & vbCrLf & _
-           "4. Set orientation to 'Top' if not already set" & vbCrLf & _
-           "5. Click OK when done, then click OK on this message", vbInformation, "Create Top View"
+    ' Try the most reliable method: Use IModelDoc2::CreateDrawViewFromModelDoc
+    ' First, open the assembly document to ensure it's loaded
+    Dim swAssyModel As SldWorks.ModelDoc2
+    Set swAssyModel = swApp.OpenDoc6(swAssy.GetPathName, swDocASSEMBLY, swOpenDocOptions_e.swOpenDocOptions_Silent, "", 0, 0)
     
-    ' Now check for the created view
-    Dim swFirstView As SldWorks.View
-    Set swFirstView = swDrawing.GetFirstView
-    If Not swFirstView Is Nothing Then
-        Set swView = swFirstView.GetNextView
-        
-        ' If there's no next view, look through all views
-        If swView Is Nothing Then
-            Dim swViews As Variant
-            swViews = swDrawing.GetViews
-            If IsArray(swViews) And UBound(swViews) >= 0 Then
-                Dim swSheetViews As Variant
-                swSheetViews = swViews(0)
-                If IsArray(swSheetViews) And UBound(swSheetViews) > 0 Then
-                    Set swView = swSheetViews(1) ' Get first actual view (not sheet)
-                End If
-            End If
-        End If
-    End If
-    
-    If swView Is Nothing Then
-        MsgBox "No drawing view found. Please ensure you have created a top view of the assembly and try running the macro again.", vbCritical
+    If swAssyModel Is Nothing Then
+        MsgBox "Could not open assembly file. Please ensure the assembly is saved."
         Exit Sub
     End If
     
-    ' Confirm we have the right view
-    MsgBox "Found drawing view: " & swView.Name & vbCrLf & "Proceeding with ModelToViewTransform...", vbInformation
+    ' Make sure the drawing is active
+    swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
+    
+    ' Method 1: Use the basic CreateDrawViewFromModelDoc (2 parameter version)
+    Set swView = swDrawing.CreateDrawViewFromModelDoc(swAssy.GetPathName, Array(0.21, 0.21))
+    
+    ' Method 2: If that fails, try with explicit position parameters
+    If swView Is Nothing Then
+        ' Try using IDrawingDoc::InsertOrthogonalView
+        Dim swSheet As SldWorks.Sheet
+        Set swSheet = swDrawing.GetCurrentSheet
+        
+        ' Create an orthogonal view using sheet coordinates
+        swModel.ClearSelection2 True
+        swDrawing.ActivateSheet swSheet.GetName
+        
+        ' Try creating view with NewDrawingView approach
+        swModel.SetAddToDB True
+        Set swView = swDrawing.NewDrawingView4(swAssy.GetPathName, 0.21, 0.21, 0, "", "", True, 0)
+        swModel.SetAddToDB False
+    End If
+    
+    ' Method 3: Try using the model document interface directly
+    If swView Is Nothing Then
+        ' Set the drawing as active document
+        Set swModel = swDrawing
+        
+        ' Try using InsertDrawingView method
+        swModel.ClearSelection2 True
+        bRet = swModel.Extension.SelectByID2("", "FACE", 0, 0, 0, False, 0, Nothing, 0)
+        
+        ' Create view using the model interface
+        Set swView = swModel.InsertDrawingView5(swAssy.GetPathName, swDrawingViewTypes_e.swDrawingNamedView, 0.21, 0.21, 0, False, False)
+    End If
+    
+    If swView Is Nothing Then
+        MsgBox "Failed to create drawing view automatically. Please check that the assembly file is saved and accessible."
+        Exit Sub
+    End If
     
     ' Set view to top orientation
     swView.SetOrientation2 swStandardViews_e.swTopView, True
