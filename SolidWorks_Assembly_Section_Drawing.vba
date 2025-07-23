@@ -122,18 +122,20 @@ Sub CreateAssemblySectionDrawing()
         ' Set the view to top orientation
         swView.SetOrientation2 swStandardViews_e.swTopView, True
     Else
-        ' Method 2: Alternative approach using InsertModelInPredefinedView
-        swModel.ClearSelection2 True
-        Set swView = swDrawing.InsertModelInPredefinedView(swAssy)
+        ' Method 2: Alternative approach using CreateDrawViewFromModelDoc2
+        Set swView = swDrawing.CreateDrawViewFromModelDoc2(swAssy.GetPathName, 0.21, 0.21)
         
         If Not swView Is Nothing Then
             ' Set view orientation to top
             swView.SetOrientation2 swStandardViews_e.swTopView, True
-            ' Position the view
-            swView.Position = Array(0.21, 0.21)
         Else
-            ' Method 3: Create view using CreateDrawViewFromModelDoc2
-            Set swView = swDrawing.CreateDrawViewFromModelDoc2(swAssy.GetPathName, 0.21, 0.21)
+            ' Method 3: Try the most basic approach - create view at position
+            swModel.ClearSelection2 True
+            ' Create a basic orthographic view
+            swApp.SendMsgToUser2 "Attempting to create view manually. Please wait...", swMessageBoxIcon_e.swMbInformation, swMessageBoxBtn_e.swMbOk
+            
+            ' Try using the NewDrawingView approach
+            Set swView = swDrawing.CreateDrawViewFromModelDoc(swAssy.GetPathName, 0.21, 0.21, 0)
             If Not swView Is Nothing Then
                 swView.SetOrientation2 swStandardViews_e.swTopView, True
             End If
