@@ -123,40 +123,59 @@ Sub CreateAssemblySectionDrawing()
     ' Make sure the drawing is active
     swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
     
-    ' Method 1: Use the basic CreateDrawViewFromModelDoc (without array)
-    Set swView = swDrawing.CreateDrawViewFromModelDoc(swAssy.GetPathName)
+    ' Use the most basic and reliable method: IModelDoc2 interface
+    Set swModel = swDrawing
+    swModel.ClearSelection2 True
     
-    ' If view was created, position it
-    If Not swView Is Nothing Then
-        swView.Position = Array(0.21, 0.21)
-    End If
+    ' Method 1: Try using the Insert menu command programmatically
+    ' This simulates the Insert > Drawing Views > Model command
+    swApp.RunCommand swCommands_e.swCommands_Insert_DrawingView_Model, ""
     
-    ' Method 2: If that fails, try with explicit position parameters
-    If swView Is Nothing Then
-        ' Try using IDrawingDoc::InsertOrthogonalView
-        Set swSheet = swDrawing.GetCurrentSheet
-        
-        ' Create an orthogonal view using sheet coordinates
-        swModel.ClearSelection2 True
-        swDrawing.ActivateSheet swSheet.GetName
-        
-        ' Try creating view with NewDrawingView approach
-        swModel.SetAddToDB True
-        Set swView = swDrawing.NewDrawingView4(swAssy.GetPathName, 0.21, 0.21, 0, "", "", True, 0)
-        swModel.SetAddToDB False
-    End If
+    ' Small delay to allow the command to process
+    Dim j As Long
+    For j = 1 To 500000: Next j
     
-    ' Method 3: Try using the model document interface directly
-    If swView Is Nothing Then
-        ' Set the drawing as active document
-        Set swModel = swDrawing
+    ' The command should have started the view creation process
+    ' Now we need to specify the model file and position
+    ' This is the most reliable cross-version approach
+    
+    ' Try to programmatically set the model file
+    swApp.SendKeys swAssy.GetPathName & "{ENTER}", False
+    
+    ' Another small delay
+    For j = 1 To 500000: Next j
+    
+    ' Try to click at the desired position to place the view
+    swModel.ClearSelection2 True
+    
+    ' Alternative approach: Create view using basic model insertion
+    swModel.SetAddToDB True
+    swModel.SetDisplayWhenAdded False
+    
+    ' Insert the model at the specified coordinates
+    bRet = swModel.InsertModel2(swAssy.GetPathName, 0.21, 0.21, 0, 1, 1, 1, 0, 0, 0)
+    
+    swModel.SetAddToDB False
+    swModel.SetDisplayWhenAdded True
+    
+    ' Try to get the view that was created
+    Dim swFirstView As SldWorks.View
+    Set swFirstView = swDrawing.GetFirstView
+    If Not swFirstView Is Nothing Then
+        Set swView = swFirstView.GetNextView
         
-        ' Try using InsertDrawingView method
-        swModel.ClearSelection2 True
-        bRet = swModel.Extension.SelectByID2("", "FACE", 0, 0, 0, False, 0, Nothing, 0)
-        
-        ' Create view using the model interface
-        Set swView = swModel.InsertDrawingView5(swAssy.GetPathName, swDrawingViewTypes_e.swDrawingNamedView, 0.21, 0.21, 0, False, False)
+        ' If no next view, look through all views
+        If swView Is Nothing Then
+            Dim swViews As Variant
+            swViews = swDrawing.GetViews
+            If IsArray(swViews) And UBound(swViews) >= 0 Then
+                Dim swSheetViews As Variant
+                swSheetViews = swViews(0)
+                If IsArray(swSheetViews) And UBound(swSheetViews) > 0 Then
+                    Set swView = swSheetViews(1)
+                End If
+            End If
+        End If
     End If
     
     If swView Is Nothing Then
