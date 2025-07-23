@@ -129,7 +129,6 @@ Sub CreateAssemblySectionDrawing()
     ' Method 2: If that fails, try with explicit position parameters
     If swView Is Nothing Then
         ' Try using IDrawingDoc::InsertOrthogonalView
-        Dim swSheet As SldWorks.Sheet
         Set swSheet = swDrawing.GetCurrentSheet
         
         ' Create an orthogonal view using sheet coordinates
