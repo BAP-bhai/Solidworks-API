@@ -110,16 +110,16 @@ Sub CreateAssemblySectionDrawing()
     ' STEP 5: Insert top view of the assembly
     swModel.ClearSelection2 True
     
-    ' Method 1: Try using InsertModelAnnotations3 which creates a standard view
-    Dim vModelPathNames As Variant
-    Dim sModelPaths(0) As String
-    sModelPaths(0) = swAssy.GetPathName
-    vModelPathNames = sModelPaths
+    ' Simple approach: Ask user to create the view, then continue with the macro
+    MsgBox "STEP 5: Please create a top view of the assembly now." & vbCrLf & vbCrLf & _
+           "Instructions:" & vbCrLf & _
+           "1. Go to Insert > Drawing Views > Model" & vbCrLf & _
+           "2. Browse and select your assembly file: " & swAssy.GetPathName & vbCrLf & _
+           "3. Place the view anywhere on the drawing sheet" & vbCrLf & _
+           "4. Set orientation to 'Top' if not already set" & vbCrLf & _
+           "5. Click OK when done, then click OK on this message", vbInformation, "Create Top View"
     
-    ' This method creates standard orthographic views automatically
-    bRet = swDrawing.InsertModelAnnotations3(vModelPathNames, 0.21, 0.21, 0, True, False, False, False, False, False)
-    
-    ' Get the created view
+    ' Now check for the created view
     Dim swFirstView As SldWorks.View
     Set swFirstView = swDrawing.GetFirstView
     If Not swFirstView Is Nothing Then
@@ -139,21 +139,13 @@ Sub CreateAssemblySectionDrawing()
         End If
     End If
     
-    ' Method 2: If InsertModelAnnotations3 failed, try createThirdAngleViews2
     If swView Is Nothing Then
-        ' Create third angle projection views
-        Dim vViews As Variant
-        vViews = swDrawing.createThirdAngleViews2(swAssy.GetPathName)
-        
-        If IsArray(vViews) And UBound(vViews) >= 0 Then
-            Set swView = vViews(0) ' Get the first view created
-        End If
-    End If
-    
-    If swView Is Nothing Then
-        MsgBox "Failed to create drawing view automatically. The assembly may not be saved or there may be an issue with the file path."
+        MsgBox "No drawing view found. Please ensure you have created a top view of the assembly and try running the macro again.", vbCritical
         Exit Sub
     End If
+    
+    ' Confirm we have the right view
+    MsgBox "Found drawing view: " & swView.Name & vbCrLf & "Proceeding with ModelToViewTransform...", vbInformation
     
     ' Set view to top orientation
     swView.SetOrientation2 swStandardViews_e.swTopView, True
