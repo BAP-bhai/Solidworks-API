@@ -278,10 +278,19 @@ Sub AlternativeCreateSectionView()
     End If
     
     ' Get the first view (should be the top view)
-    Set swView = swDrawing.GetFirstView.GetNextView
+    Dim swFirstView As SldWorks.View
+    Set swFirstView = swDrawing.GetFirstView
+    
+    If swFirstView Is Nothing Then
+        MsgBox "No views found in the drawing."
+        Exit Sub
+    End If
+    
+    ' Get the next view (the actual drawing view, as GetFirstView returns the sheet)
+    Set swView = swFirstView.GetNextView
     
     If swView Is Nothing Then
-        MsgBox "No view found in the drawing."
+        MsgBox "No drawing view found in the drawing."
         Exit Sub
     End If
     
