@@ -84,10 +84,11 @@ Sub CreateAssemblySectionDrawing()
     dPartOriginY = vTransformedCoords(1)
     dPartOriginZ = vTransformedCoords(2)
     
-    MsgBox "Part Origin in Assembly Coordinates:" & vbCrLf & _
-           "X: " & Format(dPartOriginX * 1000, "0.000") & " mm" & vbCrLf & _
-           "Y: " & Format(dPartOriginY * 1000, "0.000") & " mm" & vbCrLf & _
-           "Z: " & Format(dPartOriginZ * 1000, "0.000") & " mm"
+    ' Use Debug.Print as requested
+    Debug.Print "Part Origin in Assembly Coordinates:"
+    Debug.Print "X: " & Format(dPartOriginX * 1000, "0.000") & " mm"
+    Debug.Print "Y: " & Format(dPartOriginY * 1000, "0.000") & " mm"
+    Debug.Print "Z: " & Format(dPartOriginZ * 1000, "0.000") & " mm"
     
     ' STEP 4: Create new drawing file with A3 size
     sDrawingTemplate = swApp.GetUserPreferenceStringValue(swUserPreferenceStringValue_e.swDefaultTemplateDrawing)
@@ -119,24 +120,25 @@ Sub CreateAssemblySectionDrawing()
     swView.SetOrientation2 swStandardViews_e.swTopView, True
     swView.ScaleRatio = Array(1, 2) ' Set scale to 1:2
     
-    ' STEP 6: Use ModelToViewTransform to get Y coordinate in drawing space
+    ' STEP 6: Use ModelToViewTransform on Y coordinate of the origin of part in assembly
     Set swMathTransform = swView.ModelToViewTransform
     
-    ' Create point at part origin in assembly coordinates
-    dOriginArray(0) = dPartOriginX
-    dOriginArray(1) = dPartOriginY
-    dOriginArray(2) = dPartOriginZ
+    ' Use the origin coordinates (0,0,0) not the part origin coordinates
+    dOriginArray(0) = 0#  ' Assembly origin X
+    dOriginArray(1) = 0#  ' Assembly origin Y  
+    dOriginArray(2) = 0#  ' Assembly origin Z
     vOriginCoords = dOriginArray
     Set swMathPt = swMathUtil.CreatePoint(vOriginCoords)
     
-    ' Transform to view coordinates using ModelToViewTransform
+    ' Transform assembly origin to view coordinates using ModelToViewTransform
     Set swMathPt = swMathPt.MultiplyTransform(swMathTransform)
     vTransformedCoords = swMathPt.ArrayData
     
-    ' Get the Y coordinate in drawing space (keeping Y coordinate constant as required)
-    dDrawingY = vTransformedCoords(1)
+    ' Use the part's Y coordinate from assembly coordinates for the section line
+    ' (Not keeping it constant, just using that Y coordinate value)
+    dDrawingY = dPartOriginY  ' Use the part's Y coordinate directly
     
-    MsgBox "Part Y coordinate transformed to drawing space: " & Format(dDrawingY * 1000, "0.000") & " mm"
+    Debug.Print "Using part Y coordinate for section line: " & Format(dDrawingY * 1000, "0.000") & " mm"
     
     ' STEP 7: Create sketching line with constant Y coordinate
     swModel.ClearSelection2 True
