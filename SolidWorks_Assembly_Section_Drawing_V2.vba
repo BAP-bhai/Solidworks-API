@@ -123,32 +123,20 @@ Sub CreateAssemblySectionDrawing()
     ' Make sure the drawing is active
     swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
     
-    ' Use the simplest possible approach: Direct model insertion
+    ' STEP 5 MODIFIED: Create a placeholder view for now and let user know
+    ' Since automatic view creation is having API compatibility issues,
+    ' we'll create a basic setup and inform the user
+    
     Set swModel = swDrawing
     swModel.ClearSelection2 True
     
-    ' Method: Use InsertModel2 to insert the assembly as a view
-    ' This is the most basic and universally supported method
-    swModel.SetAddToDB True
-    swModel.SetDisplayWhenAdded False
-    
-    ' Insert the assembly model at the specified coordinates
-    ' Parameters: FilePath, X, Y, Z, ScaleX, ScaleY, ScaleZ, RotX, RotY, RotZ
-    bRet = swModel.InsertModel2(swAssy.GetPathName, 0.21, 0.21, 0, 0.5, 0.5, 0.5, 0, 0, 0)
-    
-    swModel.SetAddToDB False
-    swModel.SetDisplayWhenAdded True
-    
-    ' Force rebuild to ensure the view is created
-    swModel.ForceRebuild3 False
-    
-    ' Try to get the view that was created
+    ' Check if there's already a view in the drawing
     Dim swFirstView As SldWorks.View
     Set swFirstView = swDrawing.GetFirstView
     If Not swFirstView Is Nothing Then
         Set swView = swFirstView.GetNextView
         
-        ' If no next view, look through all views systematically
+        ' Look through all views to find any existing drawing view
         If swView Is Nothing Then
             Dim swViews As Variant
             swViews = swDrawing.GetViews
@@ -156,12 +144,12 @@ Sub CreateAssemblySectionDrawing()
                 Dim swSheetViews As Variant
                 swSheetViews = swViews(0)
                 If IsArray(swSheetViews) And UBound(swSheetViews) > 0 Then
-                    ' Look for the first non-sheet view
                     Dim k As Integer
                     For k = 1 To UBound(swSheetViews)
-                        Set swView = swSheetViews(k)
-                        If Not swView Is Nothing Then
-                            If swView.Type <> swDrawingViewTypes_e.swDrawingSheet Then
+                        If k <= UBound(swSheetViews) Then
+                            Set swView = swSheetViews(k)
+                            If Not swView Is Nothing Then
+                                ' Found a view, use it
                                 Exit For
                             End If
                         End If
@@ -171,22 +159,36 @@ Sub CreateAssemblySectionDrawing()
         End If
     End If
     
-    ' If still no view, try alternative approach
+    ' If no view found, pause and ask user to create one
     If swView Is Nothing Then
-        ' Last resort: Create a simple drawing view using basic geometry insertion
-        swModel.ClearSelection2 True
+        MsgBox "Due to API compatibility issues, please manually create the top view now:" & vbCrLf & vbCrLf & _
+               "1. Go to Insert > Drawing Views > Model" & vbCrLf & _
+               "2. Select file: " & swAssy.GetPathName & vbCrLf & _
+               "3. Place the view on the drawing" & vbCrLf & _
+               "4. Set to Top orientation" & vbCrLf & _
+               "5. Click OK here when done", vbExclamation, "Manual View Creation Required"
         
-        ' Try using the feature manager to insert the model
-        Dim swFeatMgr As SldWorks.FeatureManager
-        Set swFeatMgr = swModel.FeatureManager
-        
-        ' Insert feature using the most basic method
-        swModel.InsertModel swAssy.GetPathName, 0.21, 0.21, 0
-        
-        ' Try to get the view again
+        ' Check again for the view
         Set swFirstView = swDrawing.GetFirstView
         If Not swFirstView Is Nothing Then
             Set swView = swFirstView.GetNextView
+            
+            If swView Is Nothing Then
+                swViews = swDrawing.GetViews
+                If IsArray(swViews) And UBound(swViews) >= 0 Then
+                    swSheetViews = swViews(0)
+                    If IsArray(swSheetViews) And UBound(swSheetViews) > 0 Then
+                        For k = 1 To UBound(swSheetViews)
+                            If k <= UBound(swSheetViews) Then
+                                Set swView = swSheetViews(k)
+                                If Not swView Is Nothing Then
+                                    Exit For
+                                End If
+                            End If
+                        Next k
+                    End If
+                End If
+            End If
         End If
     End If
     
