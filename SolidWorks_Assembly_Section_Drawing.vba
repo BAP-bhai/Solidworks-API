@@ -218,7 +218,7 @@ Sub CreateAssemblySectionDrawing()
         
         ' Method 3: If that fails, try CreateSectionViewAt2 (more parameters)
         If swSectionView Is Nothing Then
-            Set swSectionView = swDrawing.CreateSectionViewAt2(0.21, 0.1, 0, "A", swSectionViewCreationOptions_e.swSectionView_AlignedSection)
+            Set swSectionView = swDrawing.CreateSectionViewAt2(0.21, 0.1, 0, "A", swCreateSectionViewAtOptions_e.swCreateSectionView_AlignedSection)
         End If
     Else
         MsgBox "Could not select the section line. Please check if the sketch line was created properly."
