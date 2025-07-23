@@ -120,7 +120,7 @@ Sub CreateAssemblySectionDrawing()
     
     If Not swView Is Nothing Then
         ' Set the view to top orientation
-        swView.SetOrientation2 swIsometricViewOrientation_e.swTopViewOrientation, True
+        swView.SetOrientation2 swStandardViews_e.swTopView, True
     Else
         ' Method 2: Alternative approach using InsertModelInPredefinedView
         swModel.ClearSelection2 True
@@ -129,14 +129,14 @@ Sub CreateAssemblySectionDrawing()
         
         If Not swView Is Nothing Then
             ' Set view orientation to top
-            swView.SetOrientation2 swIsometricViewOrientation_e.swTopViewOrientation, True
+            swView.SetOrientation2 swStandardViews_e.swTopView, True
             ' Position the view
             swView.Position = Array(0.21, 0.21)
         Else
             ' Method 3: Create view using CreateDrawViewFromModelDoc2
             Set swView = swDrawing.CreateDrawViewFromModelDoc2(swAssy.GetPathName, 0.21, 0.21)
             If Not swView Is Nothing Then
-                swView.SetOrientation2 swIsometricViewOrientation_e.swTopViewOrientation, True
+                swView.SetOrientation2 swStandardViews_e.swTopView, True
             End If
         End If
     End If
