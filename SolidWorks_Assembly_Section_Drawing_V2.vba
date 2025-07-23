@@ -110,23 +110,36 @@ Sub CreateAssemblySectionDrawing()
     ' STEP 5: Insert top view of the assembly
     swModel.ClearSelection2 True
     
-    ' First activate the assembly document
-    swApp.ActivateDoc2 swAssy.GetTitle, False, 0
+    ' Method 1: Use InsertModelAnnotations3 to create view
+    Dim vModelPathNames As Variant
+    Dim vModelPathName(0) As String
+    vModelPathName(0) = swAssy.GetPathName
+    vModelPathNames = vModelPathName
     
-    ' Then activate the drawing document
-    swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
+    bRet = swDrawing.InsertModelAnnotations3(vModelPathNames, 0.21, 0.21, 0, True, False, False)
     
-    ' Use the standard method to create drawing view
-    Set swView = swDrawing.CreateDrawViewFromModelDoc3(swAssy.GetPathName, "*Top", 0.21, 0.21, 0)
+    If bRet Then
+        ' Get the created view
+        Dim swFirstView As SldWorks.View
+        Set swFirstView = swDrawing.GetFirstView
+        If Not swFirstView Is Nothing Then
+            Set swView = swFirstView.GetNextView
+        End If
+    End If
+    
+    ' Method 2: If that fails, try manual approach
+    If swView Is Nothing Then
+        ' Activate assembly first
+        swApp.ActivateDoc2 swAssy.GetTitle, False, 0
+        swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
+        
+        ' Try using DropDrawingViewFromModelDoc2
+        Set swView = swDrawing.DropDrawingViewFromModelDoc2(swAssy.GetPathName, 0.21, 0.21)
+    End If
     
     If swView Is Nothing Then
-        ' Alternative method - try without orientation specification
-        Set swView = swDrawing.CreateDrawViewFromModelDoc3(swAssy.GetPathName, "", 0.21, 0.21, 0)
-        
-        If swView Is Nothing Then
-            MsgBox "Failed to create top view. Ensure the assembly is saved and try again."
-            Exit Sub
-        End If
+        MsgBox "Failed to create top view. Please manually insert a view and re-run the macro."
+        Exit Sub
     End If
     
     ' Set view to top orientation
