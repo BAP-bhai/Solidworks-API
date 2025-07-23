@@ -123,19 +123,62 @@ Sub CreateAssemblySectionDrawing()
     ' Make sure the drawing is active
     swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
     
-    ' STEP 5: Insert top view of the assembly - SIMPLIFIED
+    ' STEP 5: Insert top view of the assembly - CORRECTED
     swModel.ClearSelection2 True
     
-    ' Create auxiliary view using the method from your working code
-    Set swView = swDrawing.CreateAuxiliaryViewAt2(0.21, 0.21, 0, False, "TopView", True, True)
+    ' First, we need to create a basic parent view since CreateAuxiliaryViewAt2 requires one
+    ' Try to create a standard view first using the most basic method
     
-    ' If auxiliary view created, set it to top orientation
-    If Not swView Is Nothing Then
-        swView.SetOrientation2 swStandardViews_e.swTopView, True
+    ' Method 1: Try creating a view by opening the assembly and using drag-drop simulation
+    Dim swAssyDoc As SldWorks.ModelDoc2
+    Set swAssyDoc = swApp.OpenDoc6(swAssy.GetPathName, swDocASSEMBLY, swOpenDocOptions_e.swOpenDocOptions_Silent, "", 0, 0)
+    
+    If Not swAssyDoc Is Nothing Then
+        ' Activate the assembly
+        swApp.ActivateDoc2 swAssyDoc.GetTitle, False, 0
+        
+        ' Activate the drawing
+        swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
+        
+        ' Try using the Insert > Model command approach
+        swModel.ClearSelection2 True
+        
+        ' Use the feature manager to insert a view
+        Dim swFeatMgr As SldWorks.FeatureManager
+        Set swFeatMgr = swModel.FeatureManager
+        
+        ' Try the InsertModel method (basic version)
+        bRet = swModel.InsertModel(swAssy.GetPathName, 0.21, 0.21, 0)
+        
+        If bRet Then
+            ' Try to find the created view
+            Dim swFirstView As SldWorks.View
+            Set swFirstView = swDrawing.GetFirstView
+            If Not swFirstView Is Nothing Then
+                Set swView = swFirstView.GetNextView
+            End If
+        End If
+    End If
+    
+    ' Method 2: If InsertModel failed, try manual instruction approach
+    If swView Is Nothing Then
+        MsgBox "Please create a top view manually:" & vbCrLf & vbCrLf & _
+               "1. Drag the assembly file into the drawing" & vbCrLf & _
+               "2. Or use Insert > Drawing Views > Model" & vbCrLf & _
+               "3. Select: " & swAssy.GetPathName & vbCrLf & _
+               "4. Place it on the drawing" & vbCrLf & _
+               "5. Click OK when done", vbInformation
+        
+        ' Wait and check for the view
+        Dim swFirstView As SldWorks.View
+        Set swFirstView = swDrawing.GetFirstView
+        If Not swFirstView Is Nothing Then
+            Set swView = swFirstView.GetNextView
+        End If
     End If
     
     If swView Is Nothing Then
-        MsgBox "Failed to create drawing view automatically. Please check that the assembly file is saved and accessible."
+        MsgBox "No drawing view found. Cannot proceed with section view creation."
         Exit Sub
     End If
     
