@@ -107,46 +107,16 @@ Sub CreateAssemblySectionDrawing()
     bRet = swDrawing.SetupSheet5(swSheet.GetName, swDwgPaperSizes_e.swDwgPaperA3size, _
                                 swDwgTemplates_e.swDwgTemplateAsize, 1, 1, True, "", 0.42, 0.297, "Default", False)
     
-    ' STEP 5: Insert top view of the assembly
-    swModel.ClearSelection2 True
-    
-    ' Simple and reliable method - use the basic NewDrawingView approach
-    ' First, make sure the assembly is the active document
-    swApp.ActivateDoc2 swAssy.GetTitle, False, 0
-    
-    ' Copy the assembly (this puts it in clipboard for drawing insertion)
-    swAssy.EditCopy
-    
-    ' Switch back to drawing
-    swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
-    
-    ' Paste the view at the specified location
-    bRet = swDrawing.PasteSheet(0.21, 0.21, 0)
-    
-    ' If paste doesn't work, try alternative method
-    If Not bRet Then
-        ' Try using Insert > Model Items approach
-        swModel.ClearSelection2 True
-        
-        ' Create a basic view manually by setting up the view parameters
-        swModel.SetAddToDB True
-        swModel.SetDisplayWhenAdded False
-        
-        ' Use Insert Model command
-        swModel.InsertModel2 swAssy.GetPathName, 0.21, 0.21, 0, 1, 1, 1, 0, 0, 0
-        swModel.SetAddToDB False
-        swModel.SetDisplayWhenAdded True
-    End If
-    
-    ' Get the created view from the drawing
+    ' STEP 5: Get existing drawing view (user must create it manually first)
+    ' Check if there's already a drawing view present
     Dim swFirstView As SldWorks.View
     Set swFirstView = swDrawing.GetFirstView
+    
     If Not swFirstView Is Nothing Then
         Set swView = swFirstView.GetNextView
         
-        ' If there's no next view, try to get any view that was created
+        ' If there's no next view, look through all views
         If swView Is Nothing Then
-            ' Look for any view in the drawing
             Dim swViews As Variant
             swViews = swDrawing.GetViews
             If UBound(swViews) >= 0 Then
@@ -159,8 +129,15 @@ Sub CreateAssemblySectionDrawing()
         End If
     End If
     
+    ' If no view exists, ask user to create one
     If swView Is Nothing Then
-        MsgBox "Failed to create drawing view automatically. Please manually insert a top view of the assembly at position (0.21, 0.21) and re-run the macro starting from Step 6."
+        MsgBox "Please manually create a top view of the assembly in this drawing first." & vbCrLf & _
+               "Steps:" & vbCrLf & _
+               "1. Go to Insert > Drawing Views > Model" & vbCrLf & _
+               "2. Select your assembly file" & vbCrLf & _
+               "3. Place the view on the drawing" & vbCrLf & _
+               "4. Set it to Top view orientation" & vbCrLf & _
+               "5. Then re-run this macro", vbInformation
         Exit Sub
     End If
     
