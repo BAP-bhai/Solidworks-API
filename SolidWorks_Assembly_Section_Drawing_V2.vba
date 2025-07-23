@@ -107,11 +107,21 @@ Sub CreateAssemblySectionDrawing()
     bRet = swDrawing.SetupSheet5(swSheet.GetName, swDwgPaperSizes_e.swDwgPaperA3size, _
                                 swDwgTemplates_e.swDwgTemplateAsize, 1, 1, True, "", 0.42, 0.297, "Default", False)
     
-    ' STEP 5: Get existing drawing view (user must create it manually first)
-    ' Check if there's already a drawing view present
+    ' STEP 5: Insert top view of the assembly
+    swModel.ClearSelection2 True
+    
+    ' Method 1: Try using InsertModelAnnotations3 which creates a standard view
+    Dim vModelPathNames As Variant
+    Dim sModelPaths(0) As String
+    sModelPaths(0) = swAssy.GetPathName
+    vModelPathNames = sModelPaths
+    
+    ' This method creates standard orthographic views automatically
+    bRet = swDrawing.InsertModelAnnotations3(vModelPathNames, 0.21, 0.21, 0, True, False, False, False, False, False)
+    
+    ' Get the created view
     Dim swFirstView As SldWorks.View
     Set swFirstView = swDrawing.GetFirstView
-    
     If Not swFirstView Is Nothing Then
         Set swView = swFirstView.GetNextView
         
@@ -119,25 +129,29 @@ Sub CreateAssemblySectionDrawing()
         If swView Is Nothing Then
             Dim swViews As Variant
             swViews = swDrawing.GetViews
-            If UBound(swViews) >= 0 Then
+            If IsArray(swViews) And UBound(swViews) >= 0 Then
                 Dim swSheetViews As Variant
                 swSheetViews = swViews(0)
-                If UBound(swSheetViews) > 0 Then
+                If IsArray(swSheetViews) And UBound(swSheetViews) > 0 Then
                     Set swView = swSheetViews(1) ' Get first actual view (not sheet)
                 End If
             End If
         End If
     End If
     
-    ' If no view exists, ask user to create one
+    ' Method 2: If InsertModelAnnotations3 failed, try createThirdAngleViews2
     If swView Is Nothing Then
-        MsgBox "Please manually create a top view of the assembly in this drawing first." & vbCrLf & _
-               "Steps:" & vbCrLf & _
-               "1. Go to Insert > Drawing Views > Model" & vbCrLf & _
-               "2. Select your assembly file" & vbCrLf & _
-               "3. Place the view on the drawing" & vbCrLf & _
-               "4. Set it to Top view orientation" & vbCrLf & _
-               "5. Then re-run this macro", vbInformation
+        ' Create third angle projection views
+        Dim vViews As Variant
+        vViews = swDrawing.createThirdAngleViews2(swAssy.GetPathName)
+        
+        If IsArray(vViews) And UBound(vViews) >= 0 Then
+            Set swView = vViews(0) ' Get the first view created
+        End If
+    End If
+    
+    If swView Is Nothing Then
+        MsgBox "Failed to create drawing view automatically. The assembly may not be saved or there may be an issue with the file path."
         Exit Sub
     End If
     
