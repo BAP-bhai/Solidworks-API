@@ -124,8 +124,7 @@ Sub CreateAssemblySectionDrawing()
     Else
         ' Method 2: Alternative approach using InsertModelInPredefinedView
         swModel.ClearSelection2 True
-        bRet = swModel.Extension.SelectByID2("", "FACE", 0, 0, 0, False, 0, Nothing, 0)
-        Set swView = swDrawing.InsertModelInPredefinedView(swAssy.GetPathName)
+        Set swView = swDrawing.InsertModelInPredefinedView(swAssy)
         
         If Not swView Is Nothing Then
             ' Set view orientation to top
