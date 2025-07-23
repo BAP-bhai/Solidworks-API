@@ -110,17 +110,23 @@ Sub CreateAssemblySectionDrawing()
     ' STEP 5: Insert top view of the assembly
     swModel.ClearSelection2 True
     
-    ' Method 1: Try CreateDrawViewFromModelDoc with correct parameters
-    Set swView = swDrawing.CreateDrawViewFromModelDoc2(swAssy.GetPathName, 0.21, 0.21)
+    ' First activate the assembly document
+    swApp.ActivateDoc2 swAssy.GetTitle, False, 0
+    
+    ' Then activate the drawing document
+    swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
+    
+    ' Use the standard method to create drawing view
+    Set swView = swDrawing.CreateDrawViewFromModelDoc3(swAssy.GetPathName, "*Top", 0.21, 0.21, 0)
     
     If swView Is Nothing Then
-        ' Method 2: Try alternative approach
-        Set swView = swDrawing.CreateDrawViewFromModelDoc(swAssy.GetPathName, 0.21, 0.21)
-    End If
-    
-    If swView Is Nothing Then
-        MsgBox "Failed to create top view. Ensure the assembly is saved."
-        Exit Sub
+        ' Alternative method - try without orientation specification
+        Set swView = swDrawing.CreateDrawViewFromModelDoc3(swAssy.GetPathName, "", 0.21, 0.21, 0)
+        
+        If swView Is Nothing Then
+            MsgBox "Failed to create top view. Ensure the assembly is saved and try again."
+            Exit Sub
+        End If
     End If
     
     ' Set view to top orientation
