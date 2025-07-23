@@ -123,40 +123,24 @@ Sub CreateAssemblySectionDrawing()
     ' Make sure the drawing is active
     swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
     
-    ' Use the most basic and reliable method: IModelDoc2 interface
+    ' Use the simplest possible approach: Direct model insertion
     Set swModel = swDrawing
     swModel.ClearSelection2 True
     
-    ' Method 1: Try using the Insert menu command programmatically
-    ' This simulates the Insert > Drawing Views > Model command
-    swApp.RunCommand swCommands_e.swCommands_Insert_DrawingView_Model, ""
-    
-    ' Small delay to allow the command to process
-    Dim j As Long
-    For j = 1 To 500000: Next j
-    
-    ' The command should have started the view creation process
-    ' Now we need to specify the model file and position
-    ' This is the most reliable cross-version approach
-    
-    ' Try to programmatically set the model file
-    swApp.SendKeys swAssy.GetPathName & "{ENTER}", False
-    
-    ' Another small delay
-    For j = 1 To 500000: Next j
-    
-    ' Try to click at the desired position to place the view
-    swModel.ClearSelection2 True
-    
-    ' Alternative approach: Create view using basic model insertion
+    ' Method: Use InsertModel2 to insert the assembly as a view
+    ' This is the most basic and universally supported method
     swModel.SetAddToDB True
     swModel.SetDisplayWhenAdded False
     
-    ' Insert the model at the specified coordinates
-    bRet = swModel.InsertModel2(swAssy.GetPathName, 0.21, 0.21, 0, 1, 1, 1, 0, 0, 0)
+    ' Insert the assembly model at the specified coordinates
+    ' Parameters: FilePath, X, Y, Z, ScaleX, ScaleY, ScaleZ, RotX, RotY, RotZ
+    bRet = swModel.InsertModel2(swAssy.GetPathName, 0.21, 0.21, 0, 0.5, 0.5, 0.5, 0, 0, 0)
     
     swModel.SetAddToDB False
     swModel.SetDisplayWhenAdded True
+    
+    ' Force rebuild to ensure the view is created
+    swModel.ForceRebuild3 False
     
     ' Try to get the view that was created
     Dim swFirstView As SldWorks.View
@@ -164,7 +148,7 @@ Sub CreateAssemblySectionDrawing()
     If Not swFirstView Is Nothing Then
         Set swView = swFirstView.GetNextView
         
-        ' If no next view, look through all views
+        ' If no next view, look through all views systematically
         If swView Is Nothing Then
             Dim swViews As Variant
             swViews = swDrawing.GetViews
@@ -172,9 +156,37 @@ Sub CreateAssemblySectionDrawing()
                 Dim swSheetViews As Variant
                 swSheetViews = swViews(0)
                 If IsArray(swSheetViews) And UBound(swSheetViews) > 0 Then
-                    Set swView = swSheetViews(1)
+                    ' Look for the first non-sheet view
+                    Dim k As Integer
+                    For k = 1 To UBound(swSheetViews)
+                        Set swView = swSheetViews(k)
+                        If Not swView Is Nothing Then
+                            If swView.Type <> swDrawingViewTypes_e.swDrawingSheet Then
+                                Exit For
+                            End If
+                        End If
+                    Next k
                 End If
             End If
+        End If
+    End If
+    
+    ' If still no view, try alternative approach
+    If swView Is Nothing Then
+        ' Last resort: Create a simple drawing view using basic geometry insertion
+        swModel.ClearSelection2 True
+        
+        ' Try using the feature manager to insert the model
+        Dim swFeatMgr As SldWorks.FeatureManager
+        Set swFeatMgr = swModel.FeatureManager
+        
+        ' Insert feature using the most basic method
+        swModel.InsertModel swAssy.GetPathName, 0.21, 0.21, 0
+        
+        ' Try to get the view again
+        Set swFirstView = swDrawing.GetFirstView
+        If Not swFirstView Is Nothing Then
+            Set swView = swFirstView.GetNextView
         End If
     End If
     
