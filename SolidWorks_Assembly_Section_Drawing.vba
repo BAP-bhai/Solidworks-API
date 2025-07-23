@@ -218,7 +218,7 @@ Sub CreateAssemblySectionDrawing()
         
         ' Method 3: If that fails, try basic CreateSectionViewAt
         If swSectionView Is Nothing Then
-            Set swSectionView = swDrawing.CreateSectionViewAt(0.21, 0.1, "A")
+            Set swSectionView = swDrawing.CreateSectionViewAt(0.21, 0.1, 0, "A")
         End If
     End If
     
