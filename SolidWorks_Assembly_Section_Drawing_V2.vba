@@ -110,35 +110,57 @@ Sub CreateAssemblySectionDrawing()
     ' STEP 5: Insert top view of the assembly
     swModel.ClearSelection2 True
     
-    ' Method 1: Use InsertModelAnnotations3 to create view
-    Dim vModelPathNames As Variant
-    Dim vModelPathName(0) As String
-    vModelPathName(0) = swAssy.GetPathName
-    vModelPathNames = vModelPathName
+    ' Simple and reliable method - use the basic NewDrawingView approach
+    ' First, make sure the assembly is the active document
+    swApp.ActivateDoc2 swAssy.GetTitle, False, 0
     
-    bRet = swDrawing.InsertModelAnnotations3(vModelPathNames, 0.21, 0.21, 0, True, False, False)
+    ' Copy the assembly (this puts it in clipboard for drawing insertion)
+    swAssy.EditCopy
     
-    If bRet Then
-        ' Get the created view
-        Dim swFirstView As SldWorks.View
-        Set swFirstView = swDrawing.GetFirstView
-        If Not swFirstView Is Nothing Then
-            Set swView = swFirstView.GetNextView
+    ' Switch back to drawing
+    swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
+    
+    ' Paste the view at the specified location
+    bRet = swDrawing.PasteSheet(0.21, 0.21, 0)
+    
+    ' If paste doesn't work, try alternative method
+    If Not bRet Then
+        ' Try using Insert > Model Items approach
+        swModel.ClearSelection2 True
+        
+        ' Create a basic view manually by setting up the view parameters
+        swModel.SetAddToDB True
+        swModel.SetDisplayWhenAdded False
+        
+        ' Use Insert Model command
+        swModel.InsertModel2 swAssy.GetPathName, 0.21, 0.21, 0, 1, 1, 1, 0, 0, 0
+        swModel.SetAddToDB False
+        swModel.SetDisplayWhenAdded True
+    End If
+    
+    ' Get the created view from the drawing
+    Dim swFirstView As SldWorks.View
+    Set swFirstView = swDrawing.GetFirstView
+    If Not swFirstView Is Nothing Then
+        Set swView = swFirstView.GetNextView
+        
+        ' If there's no next view, try to get any view that was created
+        If swView Is Nothing Then
+            ' Look for any view in the drawing
+            Dim swViews As Variant
+            swViews = swDrawing.GetViews
+            If UBound(swViews) >= 0 Then
+                Dim swSheetViews As Variant
+                swSheetViews = swViews(0)
+                If UBound(swSheetViews) > 0 Then
+                    Set swView = swSheetViews(1) ' Get first actual view (not sheet)
+                End If
+            End If
         End If
     End If
     
-    ' Method 2: If that fails, try manual approach
     If swView Is Nothing Then
-        ' Activate assembly first
-        swApp.ActivateDoc2 swAssy.GetTitle, False, 0
-        swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
-        
-        ' Try using DropDrawingViewFromModelDoc2
-        Set swView = swDrawing.DropDrawingViewFromModelDoc2(swAssy.GetPathName, 0.21, 0.21)
-    End If
-    
-    If swView Is Nothing Then
-        MsgBox "Failed to create top view. Please manually insert a view and re-run the macro."
+        MsgBox "Failed to create drawing view automatically. Please manually insert a top view of the assembly at position (0.21, 0.21) and re-run the macro starting from Step 6."
         Exit Sub
     End If
     
