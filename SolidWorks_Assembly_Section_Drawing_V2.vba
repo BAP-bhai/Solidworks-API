@@ -123,8 +123,13 @@ Sub CreateAssemblySectionDrawing()
     ' Make sure the drawing is active
     swApp.ActivateDoc2 swDrawing.GetTitle, False, 0
     
-    ' Method 1: Use the basic CreateDrawViewFromModelDoc (2 parameter version)
-    Set swView = swDrawing.CreateDrawViewFromModelDoc(swAssy.GetPathName, Array(0.21, 0.21))
+    ' Method 1: Use the basic CreateDrawViewFromModelDoc (without array)
+    Set swView = swDrawing.CreateDrawViewFromModelDoc(swAssy.GetPathName)
+    
+    ' If view was created, position it
+    If Not swView Is Nothing Then
+        swView.Position = Array(0.21, 0.21)
+    End If
     
     ' Method 2: If that fails, try with explicit position parameters
     If swView Is Nothing Then
